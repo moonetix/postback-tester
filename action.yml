@@ -1,0 +1,45 @@
+name: Postback tester
+description: Send signed test postbacks to a staging endpoint and fail the job if credits, reversals or signature checks are wrong.
+author: Moonetix
+branding:
+  icon: check-circle
+  color: blue
+
+inputs:
+  url:
+    description: Postback URL template with macros, e.g. https://staging.example.com/postback?user={user_id}&tx={transaction_id}&status={status}&reward={reward}&hash={hash}
+    required: false
+  preset:
+    description: moonetix or custom
+    required: false
+    default: custom
+  config:
+    description: Path to a JSON config file, relative to the workspace
+    required: false
+  args:
+    description: Extra command line options, e.g. --balance-url ... --reward 0.75
+    required: false
+  secret:
+    description: Postback secret. Pass it from a repository secret. You can also set POSTBACK_SECRET or MOONETIX_POSTBACK_KEY in the step env instead.
+    required: false
+  summary:
+    description: Write a Markdown report to the job summary (true or false)
+    required: false
+    default: 'true'
+
+runs:
+  using: composite
+  steps:
+    - name: Run postback-tester
+      shell: bash
+      env:
+        PT_URL: ${{ inputs.url }}
+        PT_PRESET: ${{ inputs.preset }}
+        PT_CONFIG: ${{ inputs.config }}
+        PT_ARGS: ${{ inputs.args }}
+        PT_SUMMARY: ${{ inputs.summary }}
+        PT_SECRET: ${{ inputs.secret }}
+      run: |
+        if [ -n "$PT_SECRET" ]; then export POSTBACK_SECRET="$PT_SECRET"; fi
+        unset PT_SECRET
+        node "$GITHUB_ACTION_PATH/src/action.js"

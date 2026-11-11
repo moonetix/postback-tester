@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm test
+
+  action:
+    # Runs the action from this checkout against the example server.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Start the example server
+        run: |
+          MOONETIX_POSTBACK_KEY=test_postback_key_not_secret PORT=8080 node examples/echo-server.js &
+          sleep 1
+      - uses: ./
+        with:
+          preset: moonetix
+          url: http://127.0.0.1:8080/postback?user={user_id}&tx={transaction_id}&status={status}&reward={reward}&hash={hash}
+          args: --reward 0.75 --balance-url http://127.0.0.1:8080/balance?user={user_id} --balance-path balance
+          secret: test_postback_key_not_secret

@@ -1,0 +1,38 @@
+{
+  "name": "postback-tester",
+  "version": "1.0.0",
+  "description": "Send signed test postbacks to your reward endpoint and check credits, reversals, duplicates and tampered signatures.",
+  "private": true,
+  "license": "MIT",
+  "author": "Moonetix (https://moonetix.com)",
+  "homepage": "https://github.com/moonetix/postback-tester#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/moonetix/postback-tester.git"
+  },
+  "bin": {
+    "postback-tester": "bin/postback-tester.js"
+  },
+  "main": "src/cli.js",
+  "files": [
+    "bin/",
+    "src/",
+    "examples/"
+  ],
+  "scripts": {
+    "test": "node --test",
+    "demo:server": "node examples/echo-server.js"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "keywords": [
+    "postback",
+    "s2s",
+    "webhook",
+    "hmac",
+    "offerwall",
+    "testing",
+    "ci"
+  ]
+}
