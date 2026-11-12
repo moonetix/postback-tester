@@ -282,7 +282,7 @@ The suite covers amount formatting against PHP's rounding, `rawurlencode`, templ
 
 [Moonetix](https://moonetix.com) is an affiliate network. Publishers add its offerwall to apps, games, communities and rewards sites, and users earn the publisher's own currency by completing offers. Every credit and reversal reaches the publisher as a signed postback, which is what this tool was first written to test.
 
-**Adding an offerwall? Sign up free at https://moonetix.com/register**
+**Adding an offerwall? Sign up free at https://moonetix.com/register?from=github-postback-tester**
 
 Related open source: [offerwall-postback-handlers](https://github.com/moonetix/offerwall-postback-handlers), [datacenter-ip-ranges](https://github.com/moonetix/datacenter-ip-ranges), [awesome-offerwalls](https://github.com/moonetix/awesome-offerwalls), and more at [github.com/moonetix](https://github.com/moonetix).
 
