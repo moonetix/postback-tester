@@ -15,25 +15,6 @@ Offerwalls, survey walls and affiliate networks tell your server about a complet
 
 `postback-tester` sends the full sequence, signs every request the way the network does, and tells you which checks your endpoint passes. It is one Node.js 22 script with no dependencies, works against any network through a template, and ships a GitHub Action for staging.
 
-## What it checks
-
-| Check | Request | A correct endpoint |
-| --- | --- | --- |
-| Credit | A valid credit | Answers 2xx and adds the reward |
-| Duplicate credit (retry) | The identical request again | Answers 2xx and changes nothing |
-| Reversal of the credit | Reversal status, same transaction ID | Answers 2xx and takes the reward back |
-| Duplicate reversal | The identical reversal again | Answers 2xx and changes nothing |
-| Reversal of an unknown transaction | A reversal nobody credited | Answers 2xx and changes nothing |
-| Tampered signature | One character of the signature changed | Rejects it |
-| Tampered reward | Signed for one reward, sent with a larger one | Rejects it |
-| Signed with the wrong secret | Valid format, wrong key | Rejects it |
-| Missing signature | Signature empty or header absent | Rejects it |
-| Same credit in parallel | One new credit sent 5 times at once | Answers 2xx and credits once |
-
-"Rejects" means any answer that is not 2xx, or, with `--ok-body`, a 2xx whose body does not match. Every check also fails if the answer takes longer than `--slow` (6 seconds by default, the Moonetix limit) or is a redirect, since networks do not follow redirects.
-
-From the outside, a duplicate credit and a correct one look the same: both get a 200. Point `--balance-url` at a test endpoint that returns the user's balance, and every check also verifies the balance change. That is the only way to prove the parallel check, which catches handlers that check for a duplicate and then insert in two separate steps.
-
 ## Try it in one minute
 
 The repo has a small server with a correct handler and a naive one. No install needed beyond Node.js 22.
@@ -43,7 +24,7 @@ git clone https://github.com/moonetix/postback-tester.git
 cd postback-tester
 export MOONETIX_POSTBACK_KEY=test_postback_key_not_secret
 
-node examples/echo-server.js &            # correct handler on 127.0.0.1:8080
+node examples/echo-server.js > echo-server.log &   # correct handler on 127.0.0.1:8080
 
 node bin/postback-tester.js --preset moonetix \
   'http://127.0.0.1:8080/postback?user={user_id}&tx={transaction_id}&status={status}&reward={reward}&hash={hash}' \
@@ -67,7 +48,7 @@ postback-tester 1.0.0  preset moonetix  GET http://127.0.0.1:8080/postback?user=
 10 passed, 0 failed, 0 skipped
 ```
 
-Now stop it (`kill %1`), start `MODE=naive node examples/echo-server.js &`, which credits every request without checking anything, and run the same command:
+Now stop it (`kill %1`), start `MODE=naive node examples/echo-server.js > echo-server.log &`, which credits every request without checking anything, and run the same command:
 
 ```text
   PASS  Credit                                  200     6 ms  accepted, balance +100
@@ -80,6 +61,25 @@ Now stop it (`kill %1`), start `MODE=naive node examples/echo-server.js &`, whic
 ```
 
 The exit code is 1, so the same command fails a CI job.
+
+## What it checks
+
+| Check | Request | A correct endpoint |
+| --- | --- | --- |
+| Credit | A valid credit | Answers 2xx and adds the reward |
+| Duplicate credit (retry) | The identical request again | Answers 2xx and changes nothing |
+| Reversal of the credit | Reversal status, same transaction ID | Answers 2xx and takes the reward back |
+| Duplicate reversal | The identical reversal again | Answers 2xx and changes nothing |
+| Reversal of an unknown transaction | A reversal nobody credited | Answers 2xx and changes nothing |
+| Tampered signature | One character of the signature changed | Rejects it |
+| Tampered reward | Signed for one reward, sent with a larger one | Rejects it |
+| Signed with the wrong secret | Valid format, wrong key | Rejects it |
+| Missing signature | Signature empty or header absent | Rejects it |
+| Same credit in parallel | One new credit sent 5 times at once | Answers 2xx and credits once |
+
+"Rejects" means any answer that is not 2xx, or, with `--ok-body`, a 2xx whose body does not match. Every check fails if the answer takes longer than `--slow` (6 seconds by default, the Moonetix limit). A check that expects 2xx also fails on a redirect, since networks do not follow redirects.
+
+From the outside, a duplicate credit and a correct one look the same: both get a 200. Point `--balance-url` at a test endpoint that returns the user's balance, and every check also verifies the balance change. That is the only way to prove the parallel check, which catches handlers that check for a duplicate and then insert in two separate steps.
 
 ## Test a Moonetix endpoint
 
@@ -153,6 +153,20 @@ Signature options: `--sign` is `md5`, `sha1`, `sha256`, `hmac-sha1` or `hmac-sha
 
 `--balance-url` is a URL template that returns the current balance of `{user_id}` on your staging system, as plain text (`150.75`) or JSON (`{"balance": 150.75}` with `--balance-path balance`, nested paths like `data.user.balance` work too). The tester reads it before and after every check and compares the change with the expected one.
 
+```mermaid
+sequenceDiagram
+    participant T as postback-tester
+    participant E as Your postback endpoint
+    participant B as Balance URL (staging)
+    T->>B: Balance of the test user
+    B-->>T: before
+    T->>E: Signed, repeated or tampered postback
+    E-->>T: 2xx or a rejection, within --slow
+    T->>B: Balance of the test user
+    B-->>T: after
+    Note over T,E: PASS if the status and after minus before<br/>match what this check expects
+```
+
 Expose it on staging only, for the test user only. The tester never needs it in production, and should never run against production: it credits and reverses real balances, and the race check leaves one credit and one reversal behind for a separate transaction.
 
 ## In CI
@@ -207,6 +221,32 @@ Command line options win over the file. The secret is never allowed in it.
 ```
 
 Other keys: `method`, `body`, `bodyType`, `headers`, `reversalReward`, `okBody`, `checks`, `race`, `timeoutMs`. Run `node bin/postback-tester.js --help` for every option. `--dry-run` prints the signed requests without sending them, `--verbose` adds every request and answer to the report, `--json` prints a machine-readable report, and `--summary <file>` appends a Markdown table.
+
+## Environment variables
+
+| Variable | Read by | Default |
+| --- | --- | --- |
+| `MOONETIX_POSTBACK_KEY` | `--preset moonetix` (falls back to `POSTBACK_SECRET`) | none, required |
+| `POSTBACK_SECRET` | `--preset custom`, when the signature or URL uses the secret | none |
+| any name | `--secret-env NAME` or `"secretEnv"` in the config file, instead of the two above | none |
+| `MOONETIX_APP_ID` | the `{app_id}` macro of the moonetix preset | `demoapp0000000000000001` |
+| `PORT`, `HOST` | `examples/echo-server.js` | `8080`, `127.0.0.1` |
+| `MODE` | `examples/echo-server.js`: `strict` or `naive` | `strict` |
+| `DELAY_MS` | `examples/echo-server.js`: delay before each answer, to try `--slow` | `0` |
+
+`.env.example` lists them with the fake test values. Load it with `set -a; . ./.env; set +a`.
+
+## Troubleshooting
+
+| Message | What to do |
+| --- | --- |
+| `No secret. Set MOONETIX_POSTBACK_KEY or POSTBACK_SECRET.` | Export the key in the same shell. Exit code 2. |
+| `The moonetix preset does not allow changing sign. Use --preset custom.` | The preset is fixed to the real Moonetix format. Use `--preset custom` for other networks. |
+| `Moonetix has no settable macro {foo}.` | `--set` only takes documented Moonetix macros with this preset. |
+| `answered 301; redirects are not followed` | The URL redirects, usually http to https or a missing trailing slash. Use the final URL. |
+| `ECONNREFUSED` or `no answer within 10000 ms` | Nothing listens on that host and port, or a firewall drops the request. |
+| `balance URL did not return JSON` or `no balance found in: ...` | Add `--balance-path`, or point it at the field that holds the number. |
+| `balance changed by +100, expected 0` on the duplicate checks | The handler credits retries. Store `transaction_id` under a unique key. |
 
 ## What a passing endpoint does
 
