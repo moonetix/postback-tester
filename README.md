@@ -11,6 +11,8 @@
 
 Maintained by [Moonetix](https://moonetix.com).
 
+**[Open the live demo](https://moonetix.github.io/postback-tester/)**: all ten checks run against a correct and a naive handler, with the results side by side, and a signer that builds signed test postbacks and curl commands in your browser.
+
 Offerwalls, survey walls and affiliate networks tell your server about a completed offer with a server-to-server postback. The handler behind that URL moves real money, and the usual way to test it is to click "send test postback" once in a dashboard and see a 200. That proves almost nothing. The bugs that cost money show up on the second request: the retry that credits again, the reversal that is ignored, the forged URL that is accepted.
 
 `postback-tester` sends the full sequence, signs every request the way the network does, and tells you which checks your endpoint passes. It is one Node.js 22 script with no dependencies, works against any network through a template, and ships a GitHub Action for staging.
@@ -266,7 +268,9 @@ The checks encode the rules that keep reward balances right with any network:
 npm test
 ```
 
-The suite covers amount formatting against PHP's rounding, `rawurlencode`, template filling, every signature algorithm against RFC test vectors, the 132 Moonetix postbacks, end-to-end runs against the example server in both modes, custom schemes (MD5 with bracket macros, HMAC over a JSON body in a header), slow answers, timeouts, redirects, refused connections, config errors and the Action's argument handling.
+The suite covers amount formatting against PHP's rounding, `rawurlencode`, template filling, every signature algorithm against RFC test vectors, the 132 Moonetix postbacks, end-to-end runs against the example server in both modes, custom schemes (MD5 with bracket macros, HMAC over a JSON body in a header), slow answers, timeouts, redirects, refused connections, config errors, the Action's argument handling, and the demo page: its signer runs the modules of `src/` in the browser and must build the same requests as the command line tool.
+
+`npm run site` builds the demo page into `_site/`. It records a fresh run against both handlers of the example server and stops with an error if the results differ from the ones shown in this README.
 
 ## Further reading
 
