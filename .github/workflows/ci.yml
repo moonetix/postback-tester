@@ -17,6 +17,8 @@ jobs:
         with:
           node-version: 22
       - run: npm test
+      - name: The demo page builds from a fresh run against both handlers
+        run: npm run site
 
   action:
     # Runs the action from this checkout against the example server.
