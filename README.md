@@ -3,6 +3,7 @@
 **Send signed test postbacks to your reward endpoint and find out, before a network does, whether it pays twice, misses reversals or accepts forged requests.**
 
 [![CI](https://github.com/moonetix/postback-tester/actions/workflows/ci.yml/badge.svg)](https://github.com/moonetix/postback-tester/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/%40moonetix%2Fpostback-tester?color=004ABB)](https://www.npmjs.com/package/@moonetix/postback-tester)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![Node 22](https://img.shields.io/badge/node-22-339933)](package.json)
 [![Dependencies](https://img.shields.io/badge/dependencies-none-brightgreen)](package.json)
@@ -83,11 +84,15 @@ The exit code is 1, so the same command fails a CI job.
 
 From the outside, a duplicate credit and a correct one look the same: both get a 200. Point `--balance-url` at a test endpoint that returns the user's balance, and every check also verifies the balance change. That is the only way to prove the parallel check, which catches handlers that check for a duplicate and then insert in two separate steps.
 
+## Install
+
+The tool is on [npm](https://www.npmjs.com/package/@moonetix/postback-tester). Run it without installing with `npx @moonetix/postback-tester`, or install it with `npm install -g @moonetix/postback-tester` and run `postback-tester`. The GitHub Action below needs neither.
+
 ## Test a Moonetix endpoint
 
 ```sh
 export MOONETIX_POSTBACK_KEY=...   # Postback page of your Moonetix dashboard
-npx github:moonetix/postback-tester --preset moonetix \
+npx @moonetix/postback-tester --preset moonetix \
   'https://staging.example.com/postback?user={user_id}&tx={transaction_id}&event={event_id}&status={status}&reward={reward}&payout={payout}&hash={hash}'
 ```
 
@@ -113,7 +118,7 @@ The secret is read from `POSTBACK_SECRET`, or from the variable named with `--se
 **MD5 of a concatenation, words for statuses, body "1" for success**
 
 ```sh
-POSTBACK_SECRET=... npx github:moonetix/postback-tester \
+POSTBACK_SECRET=... npx @moonetix/postback-tester \
   'https://staging.example.com/cb?uid=[USER_ID]&amount=[AMOUNT]&oid=[TX]&status=[STATUS]&sig=[SIGNATURE]' \
   --set amount={reward} --set tx={transaction_id} \
   --sign md5 --sign-input '[USER_ID][AMOUNT][TX][SECRET]' \
@@ -124,7 +129,7 @@ POSTBACK_SECRET=... npx github:moonetix/postback-tester \
 **HMAC-SHA256 in the query string, negative reward on reversals**
 
 ```sh
-POSTBACK_SECRET=... npx github:moonetix/postback-tester \
+POSTBACK_SECRET=... npx @moonetix/postback-tester \
   'https://staging.example.com/pb?user={user_id}&tx={transaction_id}&amount={reward}&status={status}&signature={signature}' \
   --sign hmac-sha256 --sign-input '{user_id}{transaction_id}{reward}{status}' \
   --reversal-status 2 --reversal-reward negative
@@ -133,7 +138,7 @@ POSTBACK_SECRET=... npx github:moonetix/postback-tester \
 **HMAC-SHA1 of a JSON body, signature in a header**
 
 ```sh
-POSTBACK_SECRET=... npx github:moonetix/postback-tester \
+POSTBACK_SECRET=... npx @moonetix/postback-tester \
   'https://staging.example.com/webhooks/rewards' \
   --method POST --body-type json \
   --body '{"user":"{user_id}","tx":"{transaction_id}","status":{status},"reward":{reward}}' \
@@ -143,7 +148,7 @@ POSTBACK_SECRET=... npx github:moonetix/postback-tester \
 **A static secret parameter instead of a signature**
 
 ```sh
-POSTBACK_SECRET=... npx github:moonetix/postback-tester \
+POSTBACK_SECRET=... npx @moonetix/postback-tester \
   'https://staging.example.com/pb?key={secret}&user={user_id}&tx={transaction_id}&reward={reward}&status={status}'
 ```
 
@@ -199,7 +204,7 @@ The CI of this repo runs the action against the example server on every push; se
 ### Anywhere else
 
 ```sh
-npx github:moonetix/postback-tester --config postback-tester.json --json > postback-report.json
+npx @moonetix/postback-tester --config postback-tester.json --json > postback-report.json
 ```
 
 Exit codes: `0` every check passed, `1` a check failed, `2` usage or configuration error.

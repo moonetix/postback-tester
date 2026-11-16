@@ -1,9 +1,9 @@
 {
-  "name": "postback-tester",
-  "version": "1.0.0",
+  "name": "@moonetix/postback-tester",
+  "version": "1.1.0",
   "description": "Send signed test postbacks to your reward endpoint and check credits, reversals, duplicates and tampered signatures.",
-  "private": true,
   "license": "MIT",
+  "publishConfig": { "access": "public" },
   "author": "Moonetix (https://moonetix.com)",
   "homepage": "https://github.com/moonetix/postback-tester#readme",
   "repository": {

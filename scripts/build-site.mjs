@@ -31,7 +31,7 @@ const { presets } = require('../src/presets.js');
 const { version } = require('../package.json');
 
 const KEY = 'test_postback_key_not_secret';
-const TOOL = 'npx github:moonetix/postback-tester';
+const TOOL = 'npx @moonetix/postback-tester';
 
 // What a failed check means for the balance sheet. The request and the expected
 // answer of each check come from the table in the README.

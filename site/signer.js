@@ -134,7 +134,7 @@ function needsKey(cli) {
 function commandLine(state, argv, withKey) {
   const preset = presets[state.preset];
   const rest = [...argv];
-  let head = 'npx github:moonetix/postback-tester';
+  let head = 'npx @moonetix/postback-tester';
   if (rest[0] === '--preset') head += ` ${rest.splice(0, 2).join(' ')}`;
   if (withKey) head = `${preset.secretEnv[0]}=${quote(state.key)} ${head}`;
   const lines = [head, quote(rest.shift())];

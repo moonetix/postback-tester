@@ -194,7 +194,7 @@ async function compare(state, argv, label) {
 
   // The command the page prints leads the tool to the same configuration.
   const words = shellWords(out.command);
-  const at = words.findIndex((w) => w === 'github:moonetix/postback-tester');
+  const at = words.findIndex((w) => w === '@moonetix/postback-tester');
   assert.equal(words[at - 1], 'npx', label);
   const again = resolveConfig(parseArgs(words.slice(at + 1)), ENV);
   assert.deepEqual({ ...again, okBody: String(again.okBody) }, { ...cfg, okBody: String(cfg.okBody) }, `${label}: command line`);
@@ -233,7 +233,7 @@ test('the signer matches the tool for awkward values, every algorithm and every 
   const out = await compare(moonetix, signer.toArgv(moonetix), 'moonetix, awkward values');
   assert.match(out.credit.url, /&r=1\.00001&/);
   assert.match(out.credit.url, /&x=\{foo\}&/);
-  assert.match(out.command, /^MOONETIX_POSTBACK_KEY=test_postback_key_not_secret npx github:moonetix\/postback-tester --preset moonetix \\\n/);
+  assert.match(out.command, /^MOONETIX_POSTBACK_KEY=test_postback_key_not_secret npx @moonetix\/postback-tester --preset moonetix \\\n/);
 
   for (const algo of SIGNING) {
     for (const encoding of ENCODINGS) {

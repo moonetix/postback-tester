@@ -2,7 +2,11 @@
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project uses [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [1.1.0] - 2026-11-16
+
+### Changed
+
+- The tool is on npm as [`@moonetix/postback-tester`](https://www.npmjs.com/package/@moonetix/postback-tester): `npx @moonetix/postback-tester` replaces `npx github:moonetix/postback-tester`. The GitHub Action is unchanged and stays on `@v1`.
 
 ### Added
 
@@ -21,4 +25,5 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - GitHub Action (`action.yml`) with a job summary.
 - Example server in `examples/echo-server.js` with a strict and a naive mode.
 
+[1.1.0]: https://github.com/moonetix/postback-tester/releases/tag/v1.1.0
 [1.0.0]: https://github.com/moonetix/postback-tester/releases/tag/v1.0.0
