@@ -21,7 +21,8 @@
   ],
   "scripts": {
     "test": "node --test",
-    "demo:server": "node examples/echo-server.js"
+    "demo:server": "node examples/echo-server.js",
+    "site": "node scripts/build-site.mjs"
   },
   "engines": {
     "node": ">=22"
